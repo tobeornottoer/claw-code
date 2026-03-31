@@ -5,6 +5,7 @@ mod config;
 mod conversation;
 mod file_ops;
 mod json;
+mod oauth;
 mod permissions;
 mod prompt;
 mod session;
@@ -30,6 +31,11 @@ pub use file_ops::{
     edit_file, glob_search, grep_search, read_file, write_file, EditFileOutput, GlobSearchOutput,
     GrepSearchInput, GrepSearchOutput, ReadFileOutput, StructuredPatchHunk, TextFilePayload,
     WriteFileOutput,
+};
+pub use oauth::{
+    code_challenge_s256, generate_pkce_pair, generate_state, loopback_redirect_uri,
+    OAuthAuthorizationRequest, OAuthRefreshRequest, OAuthTokenExchangeRequest, OAuthTokenSet,
+    PkceChallengeMethod, PkceCodePair,
 };
 pub use permissions::{
     PermissionMode, PermissionOutcome, PermissionPolicy, PermissionPromptDecision,
