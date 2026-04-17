@@ -6647,6 +6647,7 @@ fn build_runtime_with_plugin_state(
             allowed_tools.clone(),
             tool_registry.clone(),
             progress_reporter,
+            feature_config.model_max_tokens(),
         )?,
         CliToolExecutor::new(
             allowed_tools.clone(),
@@ -6763,6 +6764,7 @@ struct AnthropicRuntimeClient {
     tool_registry: GlobalToolRegistry,
     progress_reporter: Option<InternalPromptProgressReporter>,
     reasoning_effort: Option<String>,
+    max_tokens_override: Option<u32>,
 }
 
 impl AnthropicRuntimeClient {
@@ -6774,6 +6776,7 @@ impl AnthropicRuntimeClient {
         allowed_tools: Option<AllowedToolSet>,
         tool_registry: GlobalToolRegistry,
         progress_reporter: Option<InternalPromptProgressReporter>,
+        max_tokens_override: Option<u32>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         // Dispatch to the correct provider at construction time.
         // `ApiProviderClient` (exposed by the api crate as
@@ -6828,6 +6831,7 @@ impl AnthropicRuntimeClient {
             tool_registry,
             progress_reporter,
             reasoning_effort: None,
+            max_tokens_override,
         })
     }
 
@@ -6853,7 +6857,7 @@ impl ApiClient for AnthropicRuntimeClient {
         let is_post_tool = request_ends_with_tool_result(&request);
         let message_request = MessageRequest {
             model: self.model.clone(),
-            max_tokens: max_tokens_for_model(&self.model),
+            max_tokens: self.max_tokens_override.unwrap_or_else(|| max_tokens_for_model(&self.model)),
             messages: convert_messages(&request.messages),
             system: (!request.system_prompt.is_empty()).then(|| request.system_prompt.join("\n\n")),
             tools: self

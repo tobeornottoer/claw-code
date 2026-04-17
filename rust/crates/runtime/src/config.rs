@@ -65,6 +65,7 @@ pub struct RuntimeFeatureConfig {
     sandbox: SandboxConfig,
     provider_fallbacks: ProviderFallbackConfig,
     trusted_roots: Vec<String>,
+    model_max_tokens: Option<u32>,
 }
 
 /// Ordered chain of fallback model identifiers used when the primary
@@ -315,6 +316,7 @@ impl ConfigLoader {
             sandbox: parse_optional_sandbox_config(&merged_value)?,
             provider_fallbacks: parse_optional_provider_fallbacks(&merged_value)?,
             trusted_roots: parse_optional_trusted_roots(&merged_value)?,
+            model_max_tokens: parse_optional_model_max_tokens(&merged_value),
         };
 
         Ok(RuntimeConfig {
@@ -414,6 +416,11 @@ impl RuntimeConfig {
     pub fn trusted_roots(&self) -> &[String] {
         &self.feature_config.trusted_roots
     }
+
+    #[must_use]
+    pub fn model_max_tokens(&self) -> Option<u32> {
+        self.feature_config.model_max_tokens
+    }
 }
 
 impl RuntimeFeatureConfig {
@@ -482,6 +489,11 @@ impl RuntimeFeatureConfig {
     #[must_use]
     pub fn trusted_roots(&self) -> &[String] {
         &self.trusted_roots
+    }
+
+    #[must_use]
+    pub fn model_max_tokens(&self) -> Option<u32> {
+        self.model_max_tokens
     }
 }
 
@@ -912,6 +924,13 @@ fn parse_optional_trusted_roots(root: &JsonValue) -> Result<Vec<String>, ConfigE
         optional_string_array(object, "trustedRoots", "merged settings.trustedRoots")?
             .unwrap_or_default(),
     )
+}
+
+fn parse_optional_model_max_tokens(root: &JsonValue) -> Option<u32> {
+    root.as_object()
+        .and_then(|object| object.get("modelMaxTokens"))
+        .and_then(JsonValue::as_i64)
+        .map(|v| v as u32)
 }
 
 fn parse_filesystem_mode_label(value: &str) -> Result<FilesystemIsolationMode, ConfigError> {

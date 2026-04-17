@@ -197,6 +197,10 @@ const TOP_LEVEL_FIELDS: &[FieldSpec] = &[
         name: "trustedRoots",
         expected: FieldType::StringArray,
     },
+    FieldSpec {
+        name: "modelMaxTokens",
+        expected: FieldType::Number,
+    },
 ];
 
 const HOOKS_FIELDS: &[FieldSpec] = &[
